@@ -1,5 +1,6 @@
 package com.fitness.tracker.controller;
 
+import com.fitness.tracker.dto.GoalProgressDTO;
 import com.fitness.tracker.model.Goal;
 import com.fitness.tracker.service.GoalService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/goals")
@@ -27,10 +29,13 @@ public class GoalController {
         }
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Goal>> getGoalsByUserId(@PathVariable Long userId) {
+    @GetMapping("/progress/user/{userId}")
+    public ResponseEntity<List<GoalProgressDTO>> getGoalProgressByUserId(@PathVariable Long userId) {
         List<Goal> goals = goalService.getGoalsByUserId(userId);
-        return new ResponseEntity<>(goals, HttpStatus.OK);
+        List<GoalProgressDTO> progressList = goals.stream()
+                .map(goal -> new GoalProgressDTO(goal.getId(), goal.getGoalDescription(), calculateProgress(goal)))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(progressList);
     }
 
     @PutMapping("/goal/{goalId}")
@@ -66,5 +71,14 @@ public class GoalController {
         }
         return ResponseEntity.ok(goal);
     }
+
+    private double calculateProgress(Goal goal) {
+        if (goal.getTargetValue() == 0) {
+            return 0;
+        }
+        double progress = ((double) goal.getCurrentValue() / goal.getTargetValue()) * 100;
+        return Math.min(progress, 100); // 최대 100%로 제한
+    }
+
 
 }

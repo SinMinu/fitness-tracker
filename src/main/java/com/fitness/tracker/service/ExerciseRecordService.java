@@ -51,4 +51,9 @@ public class ExerciseRecordService {
     public void deleteExerciseRecord(Long id) {
         exerciseRecordRepository.deleteById(id);
     }
+
+    public ExerciseRecord findById(Long id) {
+        return exerciseRecordRepository.findById(id).orElse(null);
+    }
+
 }

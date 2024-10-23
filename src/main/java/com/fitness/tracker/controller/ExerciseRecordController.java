@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -48,4 +49,15 @@ public class ExerciseRecordController {
         exerciseRecordService.deleteExerciseRecord(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    // src/main/java/com/fitness/tracker/controller/ExerciseRecordController.java
+    @GetMapping("/{recordId}")
+    public ResponseEntity<ExerciseRecord> getExerciseRecordById(@PathVariable Long recordId, Principal principal) {
+        ExerciseRecord record = exerciseRecordService.findById(recordId);
+        if (record == null || !record.getUser().getUsername().equals(principal.getName())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 권한이 없거나 기록이 없는 경우
+        }
+        return ResponseEntity.ok(record);
+    }
+
 }
