@@ -2,6 +2,7 @@ package com.fitness.tracker.controller;
 
 import com.fitness.tracker.dto.GoalProgressDTO;
 import com.fitness.tracker.model.Goal;
+import com.fitness.tracker.repository.UserRepository;
 import com.fitness.tracker.service.GoalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,8 @@ public class GoalController {
 
     @Autowired
     private GoalService goalService;
+    @Autowired
+    private UserRepository userRepository;
 
     @PostMapping("/user/{userId}")
     public ResponseEntity<Goal> addGoal(@PathVariable Long userId, @RequestBody Goal goal) {
@@ -37,6 +40,16 @@ public class GoalController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(progressList);
     }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<Goal>> getGoalsByUserId(@PathVariable Long userId, Principal principal) {
+        if (!principal.getName().equals(userRepository.findById(userId).orElseThrow().getUsername())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        List<Goal> goals = goalService.getGoalsByUserId(userId);
+        return ResponseEntity.ok(goals);
+    }
+
 
     @PutMapping("/goal/{goalId}")
     public ResponseEntity<Goal> updateGoal(@PathVariable Long goalId, @RequestBody Goal updatedGoal, Principal principal) {

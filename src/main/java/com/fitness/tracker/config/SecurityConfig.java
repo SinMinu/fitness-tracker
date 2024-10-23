@@ -36,6 +36,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configure(http)) // CORS 설정 활성화
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/login", "/api/users/register").permitAll()
+                        .requestMatchers("/api/goal-tasks/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
