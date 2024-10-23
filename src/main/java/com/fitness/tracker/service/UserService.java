@@ -23,12 +23,18 @@ public class UserService {
         return userRepository.findById(id).orElse(null);
     }
 
+    // UserService.java
     public User updateUser(Long id, User updatedUser) {
         User existingUser = userRepository.findById(id).orElse(null);
         if (existingUser != null) {
             existingUser.setUsername(updatedUser.getUsername());
             existingUser.setEmail(updatedUser.getEmail());
-            existingUser.setPassword(updatedUser.getPassword());
+
+            // 비밀번호가 입력된 경우에만 암호화하여 저장
+            if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()) {
+                existingUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
+            }
+
             return userRepository.save(existingUser);
         }
         return null;
