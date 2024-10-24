@@ -17,6 +17,8 @@ public class ExerciseRecordService {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private UserService userService;
 
     public ExerciseRecord addExerciseRecord(Long userId, ExerciseRecord exerciseRecord) {
         User user = userRepository.findById(userId).orElse(null);
@@ -54,6 +56,10 @@ public class ExerciseRecordService {
 
     public ExerciseRecord findById(Long id) {
         return exerciseRecordRepository.findById(id).orElse(null);
+    }
+
+    public User findUserById(Long userId) {
+        return userService.findUserById(userId);
     }
 
 }

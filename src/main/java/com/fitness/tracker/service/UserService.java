@@ -40,4 +40,7 @@ public class UserService {
         return null;
     }
 
+    public User findUserById(Long userId) {
+        return userRepository.findById(userId).orElse(null); // 존재하지 않을 경우 null 반환
+    }
 }

@@ -9,9 +9,13 @@ public class ExerciseRecord {
     private Long id;
     private String exerciseName;
     private String exerciseType;
-    private int duration; // 운동 시간 (분 단위)
-    private int caloriesBurned;
+    private Integer duration; // 운동 시간 (분 단위)
+    private Integer caloriesBurned;
     private String exerciseDate;
+    private String location;     // 운동 장소
+    private String equipment;    // 사용한 장비
+    private String intensity;    // 운동 강도
+    private String notes;        // 메모
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -41,19 +45,19 @@ public class ExerciseRecord {
         this.exerciseType = exerciseType;
     }
 
-    public int getDuration() {
+    public Integer getDuration() {
         return duration;
     }
 
-    public void setDuration(int duration) {
+    public void setDuration(Integer duration) {
         this.duration = duration;
     }
 
-    public int getCaloriesBurned() {
+    public Integer getCaloriesBurned() {
         return caloriesBurned;
     }
 
-    public void setCaloriesBurned(int caloriesBurned) {
+    public void setCaloriesBurned(Integer caloriesBurned) {
         this.caloriesBurned = caloriesBurned;
     }
 
@@ -72,5 +76,36 @@ public class ExerciseRecord {
     public void setUser(User user) {
         this.user = user;
     }
-// getters and setters
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public String getEquipment() {
+        return equipment;
+    }
+
+    public void setEquipment(String equipment) {
+        this.equipment = equipment;
+    }
+
+    public String getIntensity() {
+        return intensity;
+    }
+
+    public void setIntensity(String intensity) {
+        this.intensity = intensity;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
 }
