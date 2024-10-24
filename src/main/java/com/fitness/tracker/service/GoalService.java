@@ -54,5 +54,10 @@ public class GoalService {
         return goalRepository.findById(goalId).orElse(null);
     }
 
+    public void save(Goal goal) {
+        goalRepository.save(goal);
+    }
+
+
 
 }

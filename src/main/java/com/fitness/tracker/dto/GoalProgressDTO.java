@@ -3,9 +3,9 @@ package com.fitness.tracker.dto;
 public class GoalProgressDTO {
     private Long goalId;
     private String goalDescription;
-    private double progress;
+    private int progress;
 
-    public GoalProgressDTO(Long goalId, String goalDescription, double progress) {
+    public GoalProgressDTO(Long goalId, String goalDescription, int progress) {
         this.goalId = goalId;
         this.goalDescription = goalDescription;
         this.progress = progress;
@@ -28,11 +28,11 @@ public class GoalProgressDTO {
         this.goalDescription = goalDescription;
     }
 
-    public double getProgress() {
+    public int getProgress() {
         return progress;
     }
 
-    public void setProgress(double progress) {
+    public void setProgress(int progress) {
         this.progress = progress;
     }
 }

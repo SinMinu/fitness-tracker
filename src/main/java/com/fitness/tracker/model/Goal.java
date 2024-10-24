@@ -9,7 +9,7 @@ public class Goal {
     private Long id;
     private String goalDescription;
     private int targetValue; // 목표 수치 (예: 5000 걸음, 30 운동 시간 등)
-    private int currentValue; // 현재 진행 상태를 저장할 필드
+    private double currentValue; // 현재 진행 상태를 저장할 필드
     private String startDate;
     private String endDate;
     private boolean isAchieved;
@@ -19,11 +19,11 @@ public class Goal {
     private User user;
 
     // 기존 필드와 메서드는 그대로 유지하고, currentValue 관련 메서드 추가
-    public int getCurrentValue() {
+    public double getCurrentValue() {
         return currentValue;
     }
 
-    public void setCurrentValue(int currentValue) {
+    public void setCurrentValue(double currentValue) {
         this.currentValue = currentValue;
     }
 
@@ -82,5 +82,4 @@ public class Goal {
     public void setUser(User user) {
         this.user = user;
     }
-// getters and setters
 }
