@@ -2,6 +2,8 @@ package com.fitness.tracker.model;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
+
 @Entity
 public class ExerciseRecord {
     @Id
@@ -11,7 +13,7 @@ public class ExerciseRecord {
     private String exerciseType;
     private Integer duration; // 운동 시간 (분 단위)
     private Integer caloriesBurned;
-    private String exerciseDate;
+    private LocalDate exerciseDate;
     private String location;     // 운동 장소
     private String equipment;    // 사용한 장비
     private String intensity;    // 운동 강도
@@ -61,12 +63,12 @@ public class ExerciseRecord {
         this.caloriesBurned = caloriesBurned;
     }
 
-    public String getExerciseDate() {
+    public LocalDate getExerciseDate() {
         return exerciseDate;
     }
 
     public void setExerciseDate(String exerciseDate) {
-        this.exerciseDate = exerciseDate;
+        this.exerciseDate = LocalDate.parse(exerciseDate);
     }
 
     public User getUser() {

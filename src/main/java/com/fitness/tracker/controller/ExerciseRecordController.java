@@ -1,7 +1,9 @@
 package com.fitness.tracker.controller;
 
 import com.fitness.tracker.model.ExerciseRecord;
+import com.fitness.tracker.model.User;
 import com.fitness.tracker.service.ExerciseRecordService;
+import com.fitness.tracker.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,8 @@ public class ExerciseRecordController {
 
     @Autowired
     private ExerciseRecordService exerciseRecordService;
+    @Autowired
+    private UserService userService;
 
     // 운동 기록 추가
     @PostMapping("/user/{userId}")
@@ -24,10 +28,16 @@ public class ExerciseRecordController {
             @RequestBody ExerciseRecord exerciseRecord,
             Principal principal) {
 
-        if (!principal.getName().equals(exerciseRecord.getUser().getUsername())) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN); // 권한 체크
+        // 현재 로그인한 사용자가 userId와 동일한지 확인
+        User currentUser = userService.findUserByUsername(principal.getName());
+        if (currentUser == null || !currentUser.getId().equals(userId)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN); // 권한이 없을 경우
         }
 
+        // ExerciseRecord에 사용자 정보 설정
+        exerciseRecord.setUser(currentUser);
+
+        // ExerciseRecord 저장
         ExerciseRecord savedRecord = exerciseRecordService.addExerciseRecord(userId, exerciseRecord);
         if (savedRecord != null) {
             return new ResponseEntity<>(savedRecord, HttpStatus.CREATED);
@@ -109,4 +119,30 @@ public class ExerciseRecordController {
         exerciseRecordService.deleteExerciseRecord(recordId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    @GetMapping("/user/{userId}/analysis")
+    public ResponseEntity<List<ExerciseRecord>> getExerciseRecordsByDateRange(
+            @PathVariable Long userId,
+            @RequestParam String startDate,
+            @RequestParam String endDate) {
+
+        List<ExerciseRecord> records = exerciseRecordService.getExerciseRecordsByDateRange(userId, startDate, endDate);
+        return new ResponseEntity<>(records, HttpStatus.OK);
+    }
+
+    // 사용자에게 운동 추천 및 피드백 제공
+    @GetMapping("/user/{userId}/recommendations")
+    public ResponseEntity<List<String>> getRecommendations(@PathVariable Long userId, Principal principal) {
+        // 권한 체크
+        User currentUser = userService.findUserByUsername(principal.getName());
+        if (currentUser == null || !currentUser.getId().equals(userId)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN); // 현재 사용자와 요청된 userId가 다를 경우
+        }
+
+        // 추천 운동 로직
+        List<String> recommendations = exerciseRecordService.getRecommendations(userId);
+        return new ResponseEntity<>(recommendations, HttpStatus.OK);
+    }
+
+
 }

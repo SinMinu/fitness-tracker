@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class UserService {
     @Autowired
@@ -42,5 +44,9 @@ public class UserService {
 
     public User findUserById(Long userId) {
         return userRepository.findById(userId).orElse(null); // 존재하지 않을 경우 null 반환
+    }
+    public User findUserByUsername(String username) {
+        Optional<User> user = userRepository.findByUsername(username);
+        return user.orElse(null);  // 존재하지 않으면 null 반환
     }
 }
