@@ -1,6 +1,8 @@
 package com.fitness.tracker.controller;
 
+import com.fitness.tracker.dto.ExerciseRecommendationDto;
 import com.fitness.tracker.model.ExerciseRecord;
+import com.fitness.tracker.model.ExerciseStats;
 import com.fitness.tracker.model.User;
 import com.fitness.tracker.service.ExerciseRecordService;
 import com.fitness.tracker.service.UserService;
@@ -28,30 +30,21 @@ public class ExerciseRecordController {
             @RequestBody ExerciseRecord exerciseRecord,
             Principal principal) {
 
-        // 현재 로그인한 사용자가 userId와 동일한지 확인
         User currentUser = userService.findUserByUsername(principal.getName());
         if (currentUser == null || !currentUser.getId().equals(userId)) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN); // 권한이 없을 경우
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
-        // ExerciseRecord에 사용자 정보 설정
         exerciseRecord.setUser(currentUser);
-
-        // ExerciseRecord 저장
         ExerciseRecord savedRecord = exerciseRecordService.addExerciseRecord(userId, exerciseRecord);
-        if (savedRecord != null) {
-            return new ResponseEntity<>(savedRecord, HttpStatus.CREATED);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        return savedRecord != null ? new ResponseEntity<>(savedRecord, HttpStatus.CREATED) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     // 특정 사용자의 운동 기록 조회
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<ExerciseRecord>> getAllExerciseRecordsByUserId(@PathVariable Long userId, Principal principal) {
-        // 본인의 기록만 조회할 수 있도록 체크
         if (!principal.getName().equals(exerciseRecordService.findUserById(userId).getUsername())) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN); // 권한 체크
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
         List<ExerciseRecord> records = exerciseRecordService.getAllExerciseRecordsByUserId(userId);
@@ -63,18 +56,12 @@ public class ExerciseRecordController {
     public ResponseEntity<ExerciseRecord> getExerciseRecordById(@PathVariable Long recordId, Principal principal) {
         ExerciseRecord record = exerciseRecordService.findById(recordId);
 
-        if (record == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // 기록이 없을 때
-        }
-
-        if (record.getUser() == null || !record.getUser().getUsername().equals(principal.getName())) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN); // 권한 체크
+        if (record == null || !record.getUser().getUsername().equals(principal.getName())) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
         return new ResponseEntity<>(record, HttpStatus.OK);
     }
-
-
 
     // 운동 기록 수정
     @PutMapping("/user/{userId}/record/{recordId}")
@@ -83,14 +70,12 @@ public class ExerciseRecordController {
             @PathVariable Long recordId,
             @RequestBody ExerciseRecord updatedRecord) {
 
-        // 기존 기록을 가져오기
         ExerciseRecord existingRecord = exerciseRecordService.findById(recordId);
 
         if (existingRecord == null || !existingRecord.getUser().getId().equals(userId)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        // null이 아닌 경우에만 업데이트
         existingRecord.setExerciseName(updatedRecord.getExerciseName() != null ? updatedRecord.getExerciseName() : existingRecord.getExerciseName());
         existingRecord.setExerciseType(updatedRecord.getExerciseType() != null ? updatedRecord.getExerciseType() : existingRecord.getExerciseType());
         existingRecord.setDuration(updatedRecord.getDuration() != null ? updatedRecord.getDuration() : existingRecord.getDuration());
@@ -100,26 +85,23 @@ public class ExerciseRecordController {
         existingRecord.setIntensity(updatedRecord.getIntensity() != null ? updatedRecord.getIntensity() : existingRecord.getIntensity());
         existingRecord.setNotes(updatedRecord.getNotes() != null ? updatedRecord.getNotes() : existingRecord.getNotes());
 
-        // 기록 업데이트
         ExerciseRecord savedRecord = exerciseRecordService.updateExerciseRecord(userId, recordId, existingRecord);
-
         return new ResponseEntity<>(savedRecord, HttpStatus.OK);
     }
-
-
 
     // 운동 기록 삭제
     @DeleteMapping("/record/{recordId}")
     public ResponseEntity<Void> deleteExerciseRecord(@PathVariable Long recordId, Principal principal) {
         ExerciseRecord existingRecord = exerciseRecordService.findById(recordId);
         if (existingRecord == null || !existingRecord.getUser().getUsername().equals(principal.getName())) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN); // 권한 체크
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
         exerciseRecordService.deleteExerciseRecord(recordId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    // 날짜 범위에 따른 운동 기록 분석
     @GetMapping("/user/{userId}/analysis")
     public ResponseEntity<List<ExerciseRecord>> getExerciseRecordsByDateRange(
             @PathVariable Long userId,
@@ -130,19 +112,40 @@ public class ExerciseRecordController {
         return new ResponseEntity<>(records, HttpStatus.OK);
     }
 
-    // 사용자에게 운동 추천 및 피드백 제공
+    // 운동 추천
     @GetMapping("/user/{userId}/recommendations")
-    public ResponseEntity<List<String>> getRecommendations(@PathVariable Long userId, Principal principal) {
-        // 권한 체크
+    public ResponseEntity<List<ExerciseRecommendationDto>> getRecommendations(@PathVariable Long userId, Principal principal) {
         User currentUser = userService.findUserByUsername(principal.getName());
         if (currentUser == null || !currentUser.getId().equals(userId)) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN); // 현재 사용자와 요청된 userId가 다를 경우
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
-        // 추천 운동 로직
-        List<String> recommendations = exerciseRecordService.getRecommendations(userId);
+        List<ExerciseRecommendationDto> recommendations = exerciseRecordService.getRecommendationsWithFrequency(userId);
         return new ResponseEntity<>(recommendations, HttpStatus.OK);
     }
 
 
+    // 사용자 운동 통계 제공
+    @GetMapping("/user/{userId}/stats")
+    public ResponseEntity<ExerciseStats> getUserExerciseStats(@PathVariable Long userId) {
+        ExerciseStats stats = exerciseRecordService.calculateExerciseStats(userId);
+        return ResponseEntity.ok(stats);
+    }
+
+    @GetMapping("/user/{userId}/stats/{period}")
+    public ResponseEntity<List<ExerciseStats>> getPeriodExerciseStats(@PathVariable Long userId, @PathVariable String period) {
+        List<ExerciseStats> stats = exerciseRecordService.calculatePeriodStats(userId, period);
+        return ResponseEntity.ok(stats);
+    }
+
+    @GetMapping("/user/{userId}/personalized-recommendations")
+    public ResponseEntity<List<String>> getPersonalizedRecommendations(@PathVariable Long userId, Principal principal) {
+        User currentUser = userService.findUserByUsername(principal.getName());
+        if (currentUser == null || !currentUser.getId().equals(userId)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        List<String> recommendations = exerciseRecordService.getPersonalizedRecommendations(userId);
+        return new ResponseEntity<>(recommendations, HttpStatus.OK);
+    }
 }
