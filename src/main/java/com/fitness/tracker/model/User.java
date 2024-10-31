@@ -14,6 +14,12 @@ public class User {
     private String email;
     private String password;
 
+    public User() {} // 기본 생성자
+
+    public User(Long id) {
+        this.id = id;
+    }
+
     public Long getId() {
         return id;
     }

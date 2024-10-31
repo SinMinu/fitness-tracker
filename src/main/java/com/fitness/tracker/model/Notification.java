@@ -1,7 +1,7 @@
 package com.fitness.tracker.model;
 
+import com.fitness.tracker.enums.NotificationType;
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -15,6 +15,10 @@ public class Notification {
 
     @Column(nullable = false)
     private String message;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private NotificationType type; // type 필드 추가
 
     @Column(nullable = false)
     private boolean isRead = false;
@@ -45,6 +49,14 @@ public class Notification {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public NotificationType getType() { // getter 추가
+        return type;
+    }
+
+    public void setType(NotificationType type) { // setter 추가
+        this.type = type;
     }
 
     public Boolean getIsRead() {
