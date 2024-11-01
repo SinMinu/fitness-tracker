@@ -64,7 +64,7 @@ public class ExerciseRecordService {
     }
 
     public User findUserById(Long userId) {
-        return userService.findUserById(userId);
+        return userService.getUserById(userId);
     }
 
     public List<ExerciseRecord> getExerciseRecordsByDateRange(Long userId, String startDate, String endDate) {
